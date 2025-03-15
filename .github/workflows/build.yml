@@ -23,10 +23,10 @@ jobs:
             nuitka_args: --mingw32
             
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           architecture: ${{ matrix.architecture }}
@@ -42,7 +42,7 @@ jobs:
           python -m nuitka --standalone ${{ matrix.nuitka_args }} --follow-imports --windows-icon-from-ico=icon.ico --windows-uac-admin --output-dir=dist src/ai_chat/main.py
           
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ai-chat-win-${{ matrix.arch }}
           path: dist/
@@ -61,10 +61,10 @@ jobs:
             nuitka_args: --macos-target-arch=arm64
             
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           
@@ -83,7 +83,7 @@ jobs:
           hdiutil create -volname "AI Chat" -srcfolder dist/main.app -ov -format UDZO dist/AIChat-${{ matrix.arch }}.dmg
           
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ai-chat-macos-${{ matrix.arch }}
           path: dist/ 
