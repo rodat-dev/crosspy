@@ -15,12 +15,12 @@ if [[ "$OS" == "Darwin" ]]; then  # macOS
     if [[ "$ARCH" == "arm64" ]]; then
         echo "Building for macOS ARM64..."
         python -m nuitka --standalone --macos-create-app-bundle --macos-target-arch=arm64 \
-            --follow-imports \
+            --follow-imports --disable-ccache \
             --output-dir=dist src/ai_chat/main.py
     else
         echo "Building for macOS x86_64..."
         python -m nuitka --standalone --macos-create-app-bundle --macos-target-arch=x86_64 \
-            --follow-imports \
+            --follow-imports --disable-ccache \
             --output-dir=dist src/ai_chat/main.py
     fi
     
@@ -30,18 +30,18 @@ if [[ "$OS" == "Darwin" ]]; then  # macOS
 elif [[ "$OS" == "Linux" ]]; then  # Linux
     echo "Building for Linux..."
     python -m nuitka --standalone \
-        --follow-imports \
+        --follow-imports --disable-ccache \
         --output-dir=dist src/ai_chat/main.py
         
 elif [[ "$OS" == "MINGW"* || "$OS" == "MSYS"* ]]; then  # Windows
     echo "Building for Windows..."
     if [[ "$ARCH" == "x86_64" ]]; then
-        python -m nuitka --standalone --mingw64 --windows-icon-from-ico=icon.ico \
-            --follow-imports \
+        python -m nuitka --standalone --msvc=latest --windows-icon-from-ico=icon.ico \
+            --follow-imports --disable-ccache \
             --output-dir=dist src/ai_chat/main.py
     else
-        python -m nuitka --standalone --mingw32 --windows-icon-from-ico=icon.ico \
-            --follow-imports \
+        python -m nuitka --standalone --msvc=latest --windows-icon-from-ico=icon.ico \
+            --follow-imports --disable-ccache \
             --output-dir=dist src/ai_chat/main.py
     fi
 else
