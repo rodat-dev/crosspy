@@ -1,0 +1,89 @@
+name: Build AI Chat App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Windows ${{ matrix.arch }}
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [x64, x86]
+        include:
+          - arch: x64
+            architecture: x64
+            nuitka_args: --mingw64
+          - arch: x86
+            architecture: x86
+            nuitka_args: --mingw32
+            
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          architecture: ${{ matrix.architecture }}
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install nuitka ordered-set zstandard
+          
+      - name: Build with Nuitka
+        run: |
+          python -m nuitka --standalone ${{ matrix.nuitka_args }} --follow-imports --windows-icon-from-ico=icon.ico --windows-uac-admin --output-dir=dist src/ai_chat/main.py
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ai-chat-win-${{ matrix.arch }}
+          path: dist/
+
+  build-macos:
+    name: Build macOS ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            os: macos-12
+            nuitka_args: --macos-target-arch=x86_64
+          - arch: arm64
+            os: macos-14
+            nuitka_args: --macos-target-arch=arm64
+            
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install nuitka ordered-set zstandard
+          
+      - name: Build with Nuitka
+        run: |
+          python -m nuitka --standalone --macos-create-app-bundle ${{ matrix.nuitka_args }} --follow-imports --output-dir=dist src/ai_chat/main.py
+          
+      - name: Create DMG (optional)
+        run: |
+          hdiutil create -volname "AI Chat" -srcfolder dist/main.app -ov -format UDZO dist/AIChat-${{ matrix.arch }}.dmg
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ai-chat-macos-${{ matrix.arch }}
+          path: dist/ 
